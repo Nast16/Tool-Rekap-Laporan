@@ -46,3 +46,14 @@ def load_data(file_path):
     except Exception as e:
         print(f"Gagal load {file_path}: {e}")
         return None
+
+def clean_and_normalize(df):
+    # placeholder
+    return df
+
+def export_results(df_valid, df_error, output_path):
+    valid_path = os.path.join(output_path, "laporan_final.xlsx")
+    error_path = os.path,join(output_path, "data_error.xlsx")
+
+    df_valid.to_excel(valid_path, index=False)
+    df_error.to_excel(error_path, index=False)
