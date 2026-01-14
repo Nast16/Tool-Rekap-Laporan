@@ -10,7 +10,7 @@ def proses_folder(folder_path):
 
     for file in files:
         df = load_data(file)
-        if ds in None:
+        if df in None:
             continue
 
         df = clean_and_normalize(df)
@@ -48,12 +48,63 @@ def load_data(file_path):
         return None
 
 def clean_and_normalize(df):
-    # placeholder
+    df = df.copy()
+
+    df.columns = [col.strip() for col in df.columns]
+
+    column_mapping = {
+        "tgl": "Tanggal",
+        "tanggal": "Tanggal",
+        "date": "Tanggal",
+
+        "qty": "Jumlah",
+        "jumlah": "Jumlah",
+        "quantity": "Jumlah",
+
+        "harga": "Harga",
+        "price": "Harga",
+
+        "status": "Status Pembayaran",
+        "status pembayaran": "Status Pembayaran",
+        "payment status": "Status Pembayaran"
+    }
+
+    rename_dict = {}
+    for col in df.columns:
+        key = col.lower()
+        if key in column_mapping:
+            rename_dict[col] = column_mapping[key]
+    
+    df = df.rename(columns=rename_dict)
+
+    df = df.dropna(how="all")
+
+    if "Jumlah" in df.columns:
+        df["Jumlah"] = pd.to_numeric(df["Jumlah"], errors="coerce")
+    
+    if "Harga" in df.columns:
+        df["Harga"] = (
+            df["Harga"]
+            .astype(str)
+            .str.replace(",", "")
+            .str.replace("Rp", "", regex=False)
+            .str.strip()
+        )
+        df["Harga"] = pd.to_numeric(df["Harga"], errors="coerce")
+
+    if "Status Pembayaran" in df.columns:
+        df["Status Pembayaran"] = (
+            df["Status Pembayaran"]
+            .astype(str)
+            .str.strip()
+            .str.upper()
+        )
+        
     return df
 
 def export_results(df_valid, df_error, output_path):
     valid_path = os.path.join(output_path, "laporan_final.xlsx")
-    error_path = os.path,join(output_path, "data_error.xlsx")
+    error_path = os.path.join(output_path, "data_error.xlsx")
 
     df_valid.to_excel(valid_path, index=False)
     df_error.to_excel(error_path, index=False)
